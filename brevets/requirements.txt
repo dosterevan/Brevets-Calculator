@@ -2,3 +2,4 @@ pymongo
 arrow
 Flask
 nose
+requests

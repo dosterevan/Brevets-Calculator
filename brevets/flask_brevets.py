@@ -4,36 +4,29 @@ Replacement for RUSA ACP brevet time calculator
 
 """
 
+import os
+import logging
+import requests # The library we use to send requests to the API
+# Not to be confused with flask.request.
+import arrow
 import flask
 from flask import request
-import arrow  # Replacement for datetime, based on moment.js
 import acp_times  # Brevet time calculations
-import config as config
-import os
-from pymongo import MongoClient
-
-# Set up MongoDB connection
-#client = MongoClient("mongodb://localhost:27017/")
-client = MongoClient('mongodb://' + os.environ['MONGODB_HOSTNAME'], 27017)
-
 import logging
 
-###
-# Globals
-###
+# Set up Flask app
 app = flask.Flask(__name__)
-#CONFIG = config.configuration()
-
-# Set up Flask app#
-app.debug = True
+app.debug = True if "DEBUG" not in os.environ else os.environ["DEBUG"]
+port_num = True if "PORT" not in os.environ else os.environ["PORT"]
 app.logger.setLevel(logging.DEBUG)
 
+##################################################
+################### API Callers ################## 
+##################################################
 
-# Use database "brevets"
-db = client.brevets
-
-# Use collection of "times" in the database
-times = db.lists
+API_ADDR = os.environ["API_ADDR"]
+API_PORT = os.environ["API_PORT"]
+API_URL = f"http://{API_ADDR}:{API_PORT}/api/"
 
 ###
 # Pages
@@ -67,70 +60,91 @@ def _calc_times():
     Expects one URL-encoded argument, the number of miles.
     """
     app.logger.debug("Got a JSON request")
+
     km = request.args.get('km', 999, type=float)
-    app.logger.debug("km={}".format(km))
-    app.logger.debug("request.args: {}".format(request.args))
-
-    brevet_dist = request.args.get('distance')
-    brevet_dist = float(brevet_dist)
-    app.logger.debug(brevet_dist)
-    #control_dist = request.form['control_dist']
-    #app.logger.debug(print("control_dist="), control_dist)
-    
-    start_time_str = request.args.get('begin_date')
-    start_time = arrow.get(start_time_str)
-    
-    open_time = acp_times.open_time(km, brevet_dist, start_time).format('YYYY-MM-DDTHH:mm')
-
-    close_time = acp_times.close_time(km, brevet_dist, start_time).format('YYYY-MM-DDTHH:mm')
-
-    if 1.2*brevet_dist < km:
-        result = {"failure": brevet_dist < km}
+    begin = request.args.get("begin_date", "now", type=str)
+    distance = request.args.get("distance", 999, type=float)
+    open_time = acp_times.open_time(km, distance, arrow.get(begin)).format('YYYY-MM-DDTHH:mm:ss')
+    close_time = acp_times.close_time(km, distance, arrow.get(begin)).format('YYYY-MM-DDTHH:mm:ss')
+    if 1.2*distance < km:
+        result = {"failure": False}
         return flask.jsonify(result=result)
-
-    result = {"open": open_time, "close": close_time, }
+    result = {"open": open_time, "close": close_time}
     return flask.jsonify(result=result)
 
 
 def get_times():
     """
-    Obtains the newest document in the "lists" collection in the database "brevets".
+    Obtains the newest document in the "lists" collection in database
+    by calling the RESTful API.
 
     Returns title (string) and items (list of dictionaries) as a tuple.
     """
+    # Get documents (rows) in our collection (table),
+    # Sort by primary key in descending order and limit to 1 document (row)
+    # This will translate into finding the newest inserted document.
 
-    # Retrieve the latest document from the "times" collection
-    form_data = times.find().sort("_id", -1).limit(1)
-    
-    # Convert the Cursor to a list
-    form_data_list = list(form_data)  
-    
-    # Log the retrieved list
-    app.logger.debug("form_data: %s", form_data_list)  
+    lists = requests.get(f"{API_URL}brevets").json()
 
-    # Iterate through the list of documents
-    for data in form_data_list:
-        # Check if the required keys are present in the document
-        if all(key in data for key in ["distance", "begin_date", "controls"]):
-            return data["distance"], data["begin_date"], data["controls"]
-        else:
-            app.logger.debug("Missing key in data: %s", data)
+    # lists should be a list of dictionaries.
+    # we just need the last one:
+    brevet = lists[-1]
+    #app.logger.debug("form_data: %s", form_data_list)  
+    return brevet["distance"], brevet["begin_date"], brevet["controls"]
+
+"""# Iterate through the list of documents
+for data in form_data_list:
+    # Check if the required keys are present in the document
+    if all(key in data for key in ["distance", "begin_date", "controls"]):
+        return data["distance"], data["begin_date"], data["controls"]
+    else:
+        app.logger.debug("Missing key in data: %s", data) """
     
+
+
+def insert_times(distance, begin_date, controls):
+    
+    """ Inserts brevet distance, control distance(s), open times, and close times into the database "brevetsdb", under the collection "times".
+    
+    Inputs brevet_distance (string), control_distances (list of strings), open_times (list of strings), and close_times (list of strings)
+
+    Returns the unique ID assigned to the document by mongo (primary key.)"""
+    
+    # Log the output
+    #app.logger.debug("output = ", output)
+
+    # Get the unique ID assigned to the inserted document
+    #_id = requests.post(f"{API_URL}/brevets", json = {"distance": distance, "begin_date": begin_date, "controls": controls}).json()
+    #app.logger.debug("_id", _id)
+
+    response = requests.post(f"{API_URL}brevets", json={"distance": distance, "begin_date": begin_date, "controls": controls})
+    print(response.text)  # Print the raw server response
+    _id = response.json()   
+
+
+    # Return the ID 
+    return _id
+
 
 @app.route('/insert', methods=['POST'])
 def insert():
     try:
         # Parse the JSON data from the request
         input_json = request.json
+        #app.logger.debug(input_json)
 
         # Extract data from the JSON
         distance = input_json["distance"]
+        #app.logger.debug(distance)
         begin_date = input_json["begin_date"]
+        #app.logger.debug("controls = %s", input_json["controls"])
         controls = input_json["controls"]
 
+
         # Insert data into the database
+        app.logger.debug("insert times = %s", insert_times(distance, begin_date, controls))
         time_id = insert_times(distance, begin_date, controls)
-        app.logger.debug("time_id = %s", time_id)
+        #app.logger.debug("time_id = %s", time_id)
 
         # Respond with a JSON message indicating success
         return flask.jsonify(result={},
@@ -145,42 +159,18 @@ def insert():
                              message="Oh no! Server error!",
                              status=0,
                              mongo_id='None')
-    
-
-def insert_times(distance, begin_date, controls):
-    """
-    Inserts brevet distance, control distance(s), open times, and close times into the database "brevetsdb", under the collection "times".
-    
-    Inputs brevet_distance (string), control_distances (list of strings), open_times (list of strings), and close_times (list of strings)
-
-    Returns the unique ID assigned to the document by mongo (primary key.)
-    """
-    
-    # Insert data into the "times" collection
-    output = times.insert_one({
-        "distance": distance,
-        "begin_date": begin_date,
-        "controls": controls})
-    
-    # Log the output
-    #app.logger.debug("output = ", output)
-
-    # Get the unique ID assigned to the inserted document
-    _id = output.inserted_id
-    
-    # Return the ID as a string
-    return str(_id)
 
 
 @app.route("/fetch")
 def fetch():
-    """
-    /fetch : fetches the brevet distance, control distance(s), open times, and close times from the database.
+    """  
+    
+    fetch : fetches the brevet distance, control distance(s), open times, and close times from the database.
 
     Accepts GET requests ONLY!
 
-    JSON interface: gets JSON, responds with JSON
-    """
+    JSON interface: gets JSON, responds with JSON"""
+ 
     try:
         # Get the latest data from the database
         distance, begin_date, controls = get_times()  
@@ -196,11 +186,6 @@ def fetch():
                 message="Failed to fetch data!")
         
         app.logger.debug("fetched!")
-
-        # Log the fetched data
-        app.logger.debug("distance = %s", distance)  
-        app.logger.debug("begin_date = %s", begin_date)
-        app.logger.debug("controls = %s", controls)
 
         # Respond with a JSON message indicating success
         return flask.jsonify(
@@ -220,10 +205,5 @@ def fetch():
 
 #############
 
-#app.debug = CONFIG.DEBUG
-if app.debug:
-    app.logger.setLevel(logging.DEBUG)
-
 if __name__ == "__main__":
-    #print("Opening for global access on port {}".format(CONFIG.PORT))
-    app.run(port=5000, host="0.0.0.0")
+    app.run(port=port_num, host="0.0.0.0")
