@@ -30,15 +30,9 @@ Except when the control distance is equal to the brevet distance, which both are
 
 ## Running the Program
 
-There are two ways to run the program.
-
 #### Docker
 
 Inside your terminal, navigate to your project-6 folder, then run 'docker compose up'. Once the container is running, you can run the application by searching http://localhost:XXXX on your browser, where XXXX is the port number specified in your docker-compose.yml file.
-
-#### Python
-
-Inside your code editor, navigate to the folder called "brevets", then run flask_brevets.py. You can run the program on a browser by typing in http://localhost:XXXX.
 
 ## Usage
 
@@ -54,7 +48,7 @@ The backend uses MongoDB to store the brevet data. Docker Compose is used to run
 
 ## Tests
 
-To test if the services run as expected, send a curl request to the API. Run docker compose and be in a directory close to the compose file. Once the three containers are running, run the following command in the terminal without quotes:
+To test if the services run as expected, send a curl request to the API. Run docker compose and be in a directory close to the compose file. Once the three containers are running, run the following command in the terminal:
 
 ```bash
 curl -i -X POST -H "Content-Type: application/json" -d '{
