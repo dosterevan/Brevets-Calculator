@@ -1,21 +1,33 @@
 """
 Resource: BrevetsResource
 """
-from flask import Response, request
+from flask import Response, request, Flask
 from flask_restful import Resource
 import logging
-from dateutil import parser
+from datetime import datetime
 
-from database.models import Brevet, Checkpoint
+app = Flask(__name__)
+app.logger.setLevel(logging.DEBUG)
+
+from database.models import Brevet
 
 
 class BrevetsResource(Resource):
     def get(self):
         json_object = Brevet.objects().to_json()
+        #app.logger.debug(json_object[])
         return Response(json_object, mimetype="application/json", status=200)
 
     def post(self):
         input_json = request.json
-        input_json['begin_date'] = parser.parse(input_json['begin_date'])
+        app.logger.debug(input_json)
+        input_json["begin_date"] = datetime.strptime(input_json["begin_date"], '%Y-%m-%dT%H:%M')
+        
+        # Convert open and close times of all controls to datetime
+        for control in input_json['controls']:
+            control['open_time'] = datetime.strptime(control['open_time'], '%Y-%m-%dT%H:%M')
+            control['close_time'] = datetime.strptime(control['close_time'], '%Y-%m-%dT%H:%M')
         result = Brevet(**input_json).save()
+        #app.logger.debug(result)
+        app.logger.debug(result["begin_date"])
         return {'_id': str(result.id)}, 200

@@ -64,10 +64,10 @@ def _calc_times():
     km = request.args.get('km', 999, type=float)
     begin = request.args.get("begin_date", "now", type=str)
     distance = request.args.get("distance", 999, type=float)
-    open_time = acp_times.open_time(km, distance, arrow.get(begin)).format('YYYY-MM-DDTHH:mm:ss')
-    close_time = acp_times.close_time(km, distance, arrow.get(begin)).format('YYYY-MM-DDTHH:mm:ss')
+    open_time = acp_times.open_time(km, distance, arrow.get(begin)).format('YYYY-MM-DDTHH:mm')
+    close_time = acp_times.close_time(km, distance, arrow.get(begin)).format('YYYY-MM-DDTHH:mm')
     if 1.2*distance < km:
-        result = {"failure": False}
+        result = {"failure": True, "status": 1}
         return flask.jsonify(result=result)
     result = {"open": open_time, "close": close_time}
     return flask.jsonify(result=result)
@@ -89,16 +89,8 @@ def get_times():
     # lists should be a list of dictionaries.
     # we just need the last one:
     brevet = lists[-1]
-    #app.logger.debug("form_data: %s", form_data_list)  
+    #app.logger.debug("got controls", brevet["controls"])
     return brevet["distance"], brevet["begin_date"], brevet["controls"]
-
-"""# Iterate through the list of documents
-for data in form_data_list:
-    # Check if the required keys are present in the document
-    if all(key in data for key in ["distance", "begin_date", "controls"]):
-        return data["distance"], data["begin_date"], data["controls"]
-    else:
-        app.logger.debug("Missing key in data: %s", data) """
     
 
 
@@ -137,7 +129,7 @@ def insert():
         distance = input_json["distance"]
         #app.logger.debug(distance)
         begin_date = input_json["begin_date"]
-        #app.logger.debug("controls = %s", input_json["controls"])
+        app.logger.debug("controls = %s", input_json["controls"])
         controls = input_json["controls"]
 
 
@@ -186,7 +178,7 @@ def fetch():
                 message="Failed to fetch data!")
         
         app.logger.debug("fetched!")
-
+        #app.logger.debug("fetched controls", controls)
         # Respond with a JSON message indicating success
         return flask.jsonify(
                 result={"distance": distance, "begin_date": begin_date, "controls": controls}, 

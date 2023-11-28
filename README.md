@@ -59,18 +59,18 @@ curl -i -X POST -H "Content-Type: application/json" -d '{
       "km": "50",
       "miles": "31.068550",
       "location": "",
-      "open_time": "2021-01-01T01:28:29",
+      "open_time": "2021-01-01T01:28",   
       "close_time": "2021-01-01T03:20"
     },
     {
       "km": "200",
       "miles": "124.274200",
       "location": "",
-      "open_time": "2021-01-01T05:52:56",
+      "open_time": "2021-01-01T05:52",   
       "close_time": "2021-01-01T13:30"
     }
   ]
-}' http://127.0.0.1:5001/api/brevets 
+}' http://127.0.0.1:5001/api/brevets
 ```
 
 Feel free to customize it further according to your project's needs.

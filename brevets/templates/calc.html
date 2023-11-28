@@ -141,18 +141,19 @@
 
               $.getJSON(TIME_CALC_URL, {km: km, distance: brevet_dist, begin_date: begin_date}).done(
                 function(data) {
-                   var times = data.result;
-                   console.log("Got a response: ");
-                   console.log("Response.open = " + times.open);
-                   // This part will automatically fill the open and close slots,
-                   // so don't worry about those.
-                   open_time_field.val(moment(times.open).format("YYYY-MM-DDTHH:mm:ss"));
-                   close_time_field.val(moment(times.close).format("YYYY-MM-DDTHH:mm:ss"));
-                   if (times.status == 1) {
-                     $("#error_message").text("The control distance cannot exceed 20% of the total Brevet distance, try again");
-                     open_time_field.val("");
-                     close_time_field.val("");
-                   }
+                  var times = data.result;
+                  console.log("Got a response: ");
+                  console.log("Response.open = " + times.open);
+                  // This part will automatically fill the open and close slots,
+                  // so don't worry about those.
+                  open_time_field.val(moment(times.open).format("YYYY-MM-DDTHH:mm"));
+                  close_time_field.val(moment(times.close).format("YYYY-MM-DDTHH:mm:ss"));
+
+                  if ((times.status == 1) || (data.failure)) {
+                  $("#error_message").text("The control distance cannot exceed 20% of the total Brevet distance, try again");
+                  open_time_field.val("");
+                  close_time_field.val("");
+                  }
                  }
                ).fail(function(err){
                  // In case you get an error...
@@ -264,25 +265,37 @@
                      if (data.status == 1) {
                         console.log("Successfully fetched: ", data);
                         var distance = $("select[name='distance']").val(data.result.distance);
-                        var begin_date = $("input[name='begin_date']").val(data.result.begin_date);
+                        var begin_date = new Date(data.result.begin_date['$date']).toISOString().slice(0,16);
+                        $("input[name='begin_date']").val(begin_date);
+                        console.log(begin_date);
                         var form_controls = data.result.controls || [];
+                        console.log(form_controls);
                         var num_controls = form_controls.length;
+
+                        for (var i = 0; i < num_controls; i++) {
+                           // Convert open_time and close_time to ISO format and slice to "YYYY-MM-DDTHH:mm"
+                           form_controls[i].open_time = new Date(form_controls[i].open_time['$date']).toISOString().slice(0,16);
+                           form_controls[i].close_time = new Date(form_controls[i].close_time['$date']).toISOString().slice(0,16);
+                        }
+
+
+                        console.log(form_controls);
 
                         // Populate each row in the HTML table with the fetched data
                         $('.control').each(function (index) {
-                              var row_item = $(this); // This is our row
-
-                              // Clear existing values
-                              row_item.find("input[name='km']").val('');
-                              row_item.find("input[name='open']").val('');
-                              row_item.find("input[name='close']").val('');
-
-                              // Check if we're already done
-                              if (index < num_controls) {
-                                 row_item.find("input[name='km']").val(form_controls[index].km);
-                                 row_item.find("input[name='open']").val(form_controls[index].open);
-                                 row_item.find("input[name='close']").val(form_controls[index].close);
-                              }
+                           var row_item = $(this); // This is our row
+                           // Check if we're already done
+                           if (index < num_controls) {
+                              row_item.find("input[name='km']").val(form_controls[index].km);
+                              row_item.find("input[name='mi']").val(form_controls[index].mi);
+                              row_item.find("input[name='location']").val(form_controls[index].location);
+                              var open_time = form_controls[index].open_time;
+                              row_item.find("input[name='open']").val(open_time);
+                              console.log(open_time);
+                              var close_time = form_controls[index].close_time;
+                              row_item.find("input[name='close']").val(close_time);
+                              console.log(close_time);
+                           }
                         });
                      } else {
                         console.log("Fetch failed: ", data);
