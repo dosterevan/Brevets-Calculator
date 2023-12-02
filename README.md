@@ -49,7 +49,7 @@ The backend uses MongoDB to store the brevet data. Docker Compose is used to run
 ## Tests
 
 To test if the services run as expected, send a curl request to the API. Run docker compose and be in a directory close to the compose file. Once the three containers are running, run the following command in the terminal:
-
+For POST
 ```bash
 curl -i -X POST -H "Content-Type: application/json" -d '{
   "distance": "200",
@@ -72,7 +72,28 @@ curl -i -X POST -H "Content-Type: application/json" -d '{
   ]
 }' http://127.0.0.1:5001/api/brevets
 ```
+For GET 
+```bash
+curl -X GET http://127.0.0.1:5001/api/brevets
+```
 
+For PUT, fill in with your _id
+```bash
+curl -X PUT -H 'Content-Type: application/json' -d 
+'{"distance": 400.0, 
+"begin_date": "2021-01-01T00:00", 
+"controls": [{"km": 50.0, "miles": 31.06855, "location": "", "open_time": "2021-01-01T01:28", "close_time": "2021-01-01T03:20"}, {"km": 200.0, "miles": 124.2742, "location": "", "open_time": "2021-01-01T05:52", "close_time": "2021-01-01T13:30"}]}' http://127.0.0.1:5001/api/brevet/_id_
+```
+
+For GET fill in with your _id
+```bash
+curl -X GET http://127.0.0.1:5001/api/brevet/_id
+```
+
+For DELETE, fill in with your _id
+```bash
+curl -X DELETE http://127.0.0.1:5001/api/brevet/_id
+```
 Feel free to customize it further according to your project's needs.
 
 ## Authors

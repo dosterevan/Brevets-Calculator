@@ -13,6 +13,7 @@ import flask
 from flask import request
 import acp_times  # Brevet time calculations
 import logging
+from datetime import datetime
 
 # Set up Flask app
 app = flask.Flask(__name__)
@@ -84,13 +85,26 @@ def get_times():
     # Sort by primary key in descending order and limit to 1 document (row)
     # This will translate into finding the newest inserted document.
 
-    lists = requests.get(f"{API_URL}brevets").json()
+    response = requests.get(f"{API_URL}brevets")
 
-    # lists should be a list of dictionaries.
-    # we just need the last one:
-    brevet = lists[-1]
-    #app.logger.debug("got controls", brevet["controls"])
-    return brevet["distance"], brevet["begin_date"], brevet["controls"]
+    # Check if the status code indicates a successful request
+    if response.status_code == 200:
+        lists = response.json()
+
+        # lists should be a list of dictionaries.
+        # we just need the last one:
+        brevet = lists[-1]
+        #app.logger.debug("got controls", brevet["controls"])
+
+        distance = brevet["distance"]
+        begin_date = brevet["begin_date"]
+        controls = brevet["controls"]
+
+        return distance, begin_date, controls
+    else:
+        print("Failed to get data from server")
+        return None, None, None
+
     
 
 
@@ -106,11 +120,19 @@ def insert_times(distance, begin_date, controls):
     #app.logger.debug("output = ", output)
 
     # Get the unique ID assigned to the inserted document
-    #_id = requests.post(f"{API_URL}/brevets", json = {"distance": distance, "begin_date": begin_date, "controls": controls}).json()
-    #app.logger.debug("_id", _id)
 
     response = requests.post(f"{API_URL}brevets", json={"distance": distance, "begin_date": begin_date, "controls": controls})
-    print(response.text)  # Print the raw server response
+    
+    print("Status code:", response.status_code)
+    print("Response content:", response.content)
+
+    if response.status_code == 200:  # OK
+        _id = response.json()
+    else:
+        print("Failed to get JSON from response")
+        _id = None
+
+    #print(response.text)  # Print the raw server response
     _id = response.json()   
 
 
@@ -131,7 +153,6 @@ def insert():
         begin_date = input_json["begin_date"]
         app.logger.debug("controls = %s", input_json["controls"])
         controls = input_json["controls"]
-
 
         # Insert data into the database
         app.logger.debug("insert times = %s", insert_times(distance, begin_date, controls))

@@ -45,8 +45,10 @@ def open_time(control_dist_km, brevet_dist_km, brevet_start_time):
          #else: 
             #hours = 200 / 34 + 200 / 32 + 200 / 30 + 200 / 28 + (control_dist_km - 1000) / 26
       elif brevet_dist_km <= control_dist_km:
-         if brevet_dist_km == 200 or brevet_dist_km == 300:
-            hours = 200 / 34
+         if brevet_dist_km == 200:
+            hours = 200 / 34 + 0.01
+         elif brevet_dist_km == 300:
+            hours = 300 / 34
          elif brevet_dist_km == 400:
             hours = 200 / 34 + (200) / 32 + 0.01
          elif brevet_dist_km == 600:
@@ -56,7 +58,7 @@ def open_time(control_dist_km, brevet_dist_km, brevet_start_time):
          else: 
             hours = 33.09
       app.logger.debug("brevet start time = %s", brevet_start_time.shift(hours=hours))
-      return brevet_start_time.shift(hours=hours)     
+      return brevet_start_time.shift(hours=hours).format('YYYY-MM-DDTHH:mm')     
 
 
 
@@ -91,5 +93,5 @@ def close_time(control_dist_km, brevet_dist_km, brevet_start_time):
          #elif brevet_dist_km > 1000:
             #hours = 600 / 15 + 1000 / 11.428 + (1200) / 13.333 + 0.01
       app.logger.debug("Brevet end time =%s", brevet_start_time.shift(hours=hours))
-      return brevet_start_time.shift(hours=hours)
+      return brevet_start_time.shift(hours=hours).format('YYYY-MM-DDTHH:mm')
 

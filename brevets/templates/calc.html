@@ -207,6 +207,8 @@
                      var location = control_data.find("input[name='location']").val();
                      var open_time = control_data.find("input[name='open']").val();
                      var close_time = control_data.find("input[name='close']").val();
+                     //var open_time = control_data.find("input[name='open']").val().toISOString();
+                     //var close_time = control_data.find("input[name='close']").val().toISOString();
                      
                      if (km) {
                         var data_json = {
@@ -218,13 +220,13 @@
                         };
                         form_controls.push(data_json);
 
-                        // item.find("input[name='km']").val('');
-                        // item.find('input[name="miles"]').val('');
-                        // item.find("input[name='open']").val('');
-                        // item.find("input[name='close']").val('');
-                        // item.find("input[name='location']").val('');
-                        // $("#begin_date").val('');
-                        // $("#brevet_dist_km").val('');
+                         control_data.find("input[name='km']").val('');
+                         control_data.find('input[name="miles"]').val('');
+                         control_data.find("input[name='open']").val('');
+                         control_data.find("input[name='close']").val('');
+                         control_data.find("input[name='location']").val('');
+                         $("#begin_date").val('');
+                         $("#brevet_dist_km").val('');
                         console.log(form_controls);
                      }
                   });
@@ -265,20 +267,12 @@
                      if (data.status == 1) {
                         console.log("Successfully fetched: ", data);
                         var distance = $("select[name='distance']").val(data.result.distance);
-                        var begin_date = new Date(data.result.begin_date['$date']).toISOString().slice(0,16);
+                        var begin_date = data.result.begin_date;
                         $("input[name='begin_date']").val(begin_date);
                         console.log(begin_date);
                         var form_controls = data.result.controls || [];
                         console.log(form_controls);
                         var num_controls = form_controls.length;
-
-                        for (var i = 0; i < num_controls; i++) {
-                           // Convert open_time and close_time to ISO format and slice to "YYYY-MM-DDTHH:mm"
-                           form_controls[i].open_time = new Date(form_controls[i].open_time['$date']).toISOString().slice(0,16);
-                           form_controls[i].close_time = new Date(form_controls[i].close_time['$date']).toISOString().slice(0,16);
-                        }
-
-
                         console.log(form_controls);
 
                         // Populate each row in the HTML table with the fetched data
@@ -287,7 +281,7 @@
                            // Check if we're already done
                            if (index < num_controls) {
                               row_item.find("input[name='km']").val(form_controls[index].km);
-                              row_item.find("input[name='mi']").val(form_controls[index].mi);
+                              row_item.find("input[name='miles']").val(form_controls[index].miles);
                               row_item.find("input[name='location']").val(form_controls[index].location);
                               var open_time = form_controls[index].open_time;
                               row_item.find("input[name='open']").val(open_time);
