@@ -79,10 +79,7 @@ curl -X GET http://127.0.0.1:5001/api/brevets
 
 For PUT, fill in with your _id
 ```bash
-curl -X PUT -H 'Content-Type: application/json' -d 
-'{"distance": 400.0, 
-"begin_date": "2021-01-01T00:00", 
-"controls": [{"km": 50.0, "miles": 31.06855, "location": "", "open_time": "2021-01-01T01:28", "close_time": "2021-01-01T03:20"}, {"km": 200.0, "miles": 124.2742, "location": "", "open_time": "2021-01-01T05:52", "close_time": "2021-01-01T13:30"}]}' http://127.0.0.1:5001/api/brevet/_id_
+curl -X PUT -H 'Content-Type: application/json' -d '{"distance": 400.0, "begin_date": "2021-01-01T00:00", "controls": [{"km": 50.0, "miles": 31.06855, "location": "", "open_time": "2021-01-01T01:28", "close_time": "2021-01-01T03:20"}, {"km": 200.0, "miles": 124.2742, "location": "", "open_time": "2021-01-01T05:52", "close_time": "2021-01-01T13:30"}]}' http://127.0.0.1:5001/api/brevet/_id_
 ```
 
 For GET fill in with your _id
