@@ -23,6 +23,14 @@ class BrevetsResource(Resource):
         input_json = request.json
         # Log the incoming JSON data for debugging purposes
         app.logger.debug(input_json)
+
+        input_json["begin_date"] = datetime.strptime(input_json["begin_date"], '%Y-%m-%dT%H:%M')
+
+        # Convert open and close times of all controls to datetime
+        for control in input_json['controls']:
+            control['open_time'] = datetime.strptime(control['open_time'], '%Y-%m-%dT%H:%M')
+            control['close_time'] = datetime.strptime(control['close_time'], '%Y-%m-%dT%H:%M')
+
         # Create a new Brevet object with the provided data and save it to the database
         result = Brevet(**input_json).save()
         # Log the result of the save operation and specific attributes for debugging

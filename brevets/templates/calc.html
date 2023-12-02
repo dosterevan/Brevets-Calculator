@@ -267,13 +267,20 @@
                      if (data.status == 1) {
                         console.log("Successfully fetched: ", data);
                         var distance = $("select[name='distance']").val(data.result.distance);
-                        var begin_date = data.result.begin_date;
+                        var begin_date = new Date(data.result.begin_date['$date']).toISOString().slice(0,16);
+                        //var begin_date = data.result.begin_date;
                         $("input[name='begin_date']").val(begin_date);
                         console.log(begin_date);
                         var form_controls = data.result.controls || [];
                         console.log(form_controls);
                         var num_controls = form_controls.length;
                         console.log(form_controls);
+
+                        for (var i = 0; i < num_controls; i++) {
+                           // Convert open_time and close_time to ISO format and slice to "YYYY-MM-DDTHH:mm"
+                           form_controls[i].open_time = new Date(form_controls[i].open_time['$date']).toISOString().slice(0,16);
+                           form_controls[i].close_time = new Date(form_controls[i].close_time['$date']).toISOString().slice(0,16);
+                        }
 
                         // Populate each row in the HTML table with the fetched data
                         $('.control').each(function (index) {

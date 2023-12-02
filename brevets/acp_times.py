@@ -58,7 +58,7 @@ def open_time(control_dist_km, brevet_dist_km, brevet_start_time):
          else: 
             hours = 33.09
       app.logger.debug("brevet start time = %s", brevet_start_time.shift(hours=hours))
-      return brevet_start_time.shift(hours=hours).format('YYYY-MM-DDTHH:mm')     
+      return brevet_start_time.shift(hours=hours)    
 
 
 
@@ -93,5 +93,5 @@ def close_time(control_dist_km, brevet_dist_km, brevet_start_time):
          #elif brevet_dist_km > 1000:
             #hours = 600 / 15 + 1000 / 11.428 + (1200) / 13.333 + 0.01
       app.logger.debug("Brevet end time =%s", brevet_start_time.shift(hours=hours))
-      return brevet_start_time.shift(hours=hours).format('YYYY-MM-DDTHH:mm')
+      return brevet_start_time.shift(hours=hours)
 
