@@ -94,4 +94,4 @@ curl -X DELETE http://127.0.0.1:5001/api/brevet/_id
 Feel free to customize it further according to your project's needs.
 
 ## Authors
-Michal Young, Ram Durairajan. Updated by Ali Hassani.
+Michal Young, Ram Durairajan. Updated by Ali Hassani. Completed by Evan Doster
