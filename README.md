@@ -6,25 +6,21 @@ edoster@uroegon.edu
 
 # Brevet Time Calculator
 
-## Outline of the Application
-
-You will reimplement RUSA ACP controle time calculator with Flask and AJAX. The calculations should populate the open and close time after pressing enter without refreshes! Inside of the application, there should be rigorous nose tests that outline potential weaknesses in the algorithm.
-
 ### ACP controle Algorithm
 
-This project introduces a web application that utilizes RUSA's online calculator. The algorithm for calculating controle times is described [here](https://rusa.org/pages/acp-brevet-control-times-calculator). Additional background information can be found [here](https://rusa.org/pages/rulesForRiders). The description may be ambiguous, but examples are provided to facilitate understanding. Part of finishing this project involves clarifying any unclear requirements and documenting them clearly.
+This project introduces a web application that utilizes RUSA's online calculator. The algorithm for calculating controle times is described [here](https://rusa.org/pages/acp-brevet-control-times-calculator). Additional background information can be found [here](https://rusa.org/pages/rulesForRiders).
 
-We are essentially replacing the calculator available [here](https://rusa.org/octime_acp.html). We can also use that calculator to clarify requirements and develop test data.
+I essentially replace the calculator available [here](https://rusa.org/octime_acp.html). I also use that calculator to clarify requirements and develop test data.
 
 ### Outline of Algorithm
 
 Depending on the control location, we can expect the minimum and maximum speed (km/hour) to change as a result of this distance. Refer to the table [here](https://rusa.org/pages/acp-brevet-control-times-calculator).
 
 The open time is calculated by dividing the control distance by the maximum speed. The algorithm can be generalized as follows:
-\[ \frac{{\text{{control distance}} - \text{{previous interval}}}}{{\text{{current maximum speed}}}} + \frac{{\text{{last interval's control distance}} - \text{{previous interval}}}}{{\text{{last interval's maximum speed}}}} + \ldots \]
+(control distance - previous interval) / (current maximum speed) + (last interval's control distance - previous interval) / (last interval's maximum speed)
 
 Similarly, the close time is calculated by dividing the control distance by the minimum speed. The algorithm can be generalized as follows:
-\[ \frac{{\text{{control distance}} - \text{{previous interval}}}}{{\text{{current minimum speed}}}} + \frac{{\text{{last interval's control distance}} - \text{{previous interval}}}}{{\text{{last interval's minimum speed}}}} + \ldots \]
+(control distance - previous interval) / (current minimum speed) + (last interval's control distance - previous interval) / (last interval's minimum speed)
 
 Except when the control distance is equal to the brevet distance, which both are equal to 200. This special rule dictates that our close time is 13H30.
 
