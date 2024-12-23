@@ -1,8 +1,7 @@
-# UOCIS322 - Project 6
-Brevet time calculator with MongoDB, and a RESTful API!
+## Brevet time calculator with MongoDB, and a RESTful API!
 
 Evan Doster
-edoster@uroegon.edu
+dosterevan@gmail.com
 
 # Brevet Time Calculator
 
